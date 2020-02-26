@@ -1,0 +1,22 @@
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: "arn:aws:ecs:us-east-1:765154140259:task-definition/blue-green-task:1"
+        LoadBalancerInfo:
+          ContainerName: "hello-world"
+          ContainerPort: 80
+        # Optional properties
+        PlatformVersion: "LATEST"
+        NetworkConfiguration:
+          AwsvpcConfiguration:
+            Subnets: ["subnet-f88fcbb2","subnet-968534ca"]
+            SecurityGroups: ["sg-7b42eb31"]
+            AssignPublicIp: "ENABLED"
+Hooks:
+  - BeforeInstall: "blue-green-lambda"
+  - AfterInstall: "sample-lambda-dev"
+  - AfterAllowTestTraffic: "test-lambda-bg"
+  - BeforeAllowTraffic: "sample-lambda-dev"
+  - AfterAllowTraffic: "blue-green-lambda"

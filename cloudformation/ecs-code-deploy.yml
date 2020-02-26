@@ -1,0 +1,23 @@
+CodeDeployApplication:
+  Type: AWS::CodeDeploy::Application
+  Properties:
+    ComputePlatform: ECS
+  TwentyFivePercentAtATime:
+
+
+    Type: AWS::CodeDeploy::DeploymentConfig
+    Properties:
+      MinimumHealthyHosts:
+      Type: "FLEET_PERCENT"
+      Value: 75
+  CodeDeployDeploymentGroup:
+
+
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties:
+      ApplicationName: !Ref CodeDeployApplication
+      DeploymentConfigName: CodeDeployDefault.ECSCanary10percent5Minutes
+      DeploymentStyle:
+        DeploymentType: BLUE_GREEN
+        DeploymentOption: WITH_TRAFFIC_CONTROL
+      ServiceRoleArn: !GetAtt CodeDeployServiceRole.Arn

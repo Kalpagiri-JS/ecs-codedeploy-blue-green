@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description:
+Resources:
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: blue-green-cluster
+  ECSService:
+    Type: AWS::ECS::Service
+  Properties:
+    Cluster: !Ref ECSCluster
+    DesiredCount: 1
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+
+  MyELB:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      Listeners:
+        - LoadBalancerPort: 80
+          InstancePort: 80
+          Protocol: HTTP
+
+  ECSServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ecs.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+        - PolicyName: ecs-service
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: ["elasticloadbalancing:DeregisterInstancesFromLoadBalancer", "elasticloadbalancing:DeregisterTargets",
+                         "elasticloadbalancing:Describe*", "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
+                         "elasticloadbalancing:RegisterTargets", "ec2:Describe*", "ec2:AuthorizeSecurityGroupIngress"]
+                Resource: '*'
+
